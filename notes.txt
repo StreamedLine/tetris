@@ -1,0 +1,6 @@
+
+
+TODO
+
+
+create universal function for checking new locations (to be used by moveLeft/Right as well as reorient)

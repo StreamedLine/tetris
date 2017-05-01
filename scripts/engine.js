@@ -14,9 +14,16 @@
 					}
 				}
 				//DEV below here should be in separate function!!!DEV
+				var newShape;
 				if (this.shapesArr.length == 0) {
-					game.gameEngine.shapes.shapesArr.push(game.gameEngine.shapes.create());
-					//check for game over!
+					game.gameEngine.shapes.shapesArr.push(newShape = game.gameEngine.shapes.create());
+					//check for game over
+					var taken = newShape.calculatePostions().some(function(pos){
+						return game.screen.xLines[pos[1]][pos[0]].chr != ' '
+					});
+					if (taken) {
+						game.gameOver = function() {return true}
+					}
 				}
 			}
 		},
@@ -24,7 +31,6 @@
 		update_map: function() {
 			this.shapes.shapesArr.forEach(function(shape){
 				shape.calculatePostions().forEach(function(pos){
-					console.log(pos)
 					game.screen.xLines[pos[1]][pos[0]].chr = '#'
 				});
 			});
@@ -43,9 +49,10 @@
 (function createShapes(){
 	function Shape(name) {
 		var sd = 0, //distance from top
-			sx = 6; //should be random without going beyond edge
+			sx = 10; //should be random without going beyond edge
 		this.shapeMap = engine.shapes.shapes['line']; //DEV should be 'name' instaed of 'line'
 		this.orientation = 0;
+		this.focused = true;
 		this.done = false;
 		this.sd = function(){return sd };
 		this.sx = function(){return sx };
@@ -59,13 +66,61 @@
 			var positions = this.calculatePostions(),
 			    guide = this.shapeMap[this.orientation];
 			guide = guide.filter(function(spot){return spot[2] === true });
-			if (guide.every(function(spot){console.log(spot[1]+1+sd);return spot[1]+1+sd < game.screen.h && game.screen.xLines[spot[1]+1+sd][spot[0]+sx].chr === ' '})) {
+			if (guide.every(function(spot){return spot[1]+1+sd < game.screen.h && game.screen.xLines[spot[1]+1+sd][spot[0]+sx].chr === ' '})) {
 				positions.forEach(function(pos){game.screen.xLines[pos[1]][pos[0]].chr = ' ' });
 				sd += 1;
 			} else {
 				this.done = true;
 			}
-		}
+		};
+		this.reorient = function(val) {
+			var original = this.orientation;
+
+			this.calculatePostions().forEach(function(pos){
+				game.screen.xLines[pos[1]][pos[0]].chr = ' '
+			});
+
+			var ortn = this.orientation += val;
+			if (ortn < 0) {this.orientation = this.shapeMap.length-1}
+			if (ortn >= this.shapeMap.length) {this.orientation = 0}
+			var taken = this.calculatePostions().some(function(pos){
+				return game.screen.xLines[pos[1]][pos[0]].chr != ' '
+			});
+			if (taken) {
+				this.orientation = original;
+				this.calculatePostions().forEach(function(pos){
+				game.screen.xLines[pos[1]][pos[0]].chr = '#'
+			});
+				return false;
+			} else {
+				game.gameEngine.update_map();
+				game.insertFrameInDom(game.screenAsString());
+				return true;
+			}
+		};
+		this.moveLeft = function(val) {
+			var positions = this.calculatePostions(),
+				guide = this.shapeMap[this.orientation];
+			guide = guide.filter(function(spot){return spot[3].left === true });
+			console.log(guide)
+			if (guide.every(function(spot){return spot[0]-1+sx >= 0 && game.screen.xLines[spot[1]+sd][spot[0]-1+sx].chr === ' '})) {
+				positions.forEach(function(pos){game.screen.xLines[pos[1]][pos[0]].chr = ' ' });
+				sx -= 1;
+				game.gameEngine.update_map();
+				game.insertFrameInDom(game.screenAsString());
+			}
+
+		};
+		this.keyboardPress = function(val) {
+			if (val == 37) {
+				console.log(val)
+				this.moveLeft(-1);
+			} 
+			if (val == 39) {
+				//this.moveSideways(1)
+			}
+			if (val == 32) this.reorient(1)
+		};
 	}
 
 	var engine = game.gameEngine;
@@ -73,7 +128,7 @@
 	engine.shapes.shapeNames = ['line', 'plus'];
 	
 	engine.shapes.shapes = {
-		line: [ [[0,0,false],[0,1,false],[0,2,true]] , [[-1,0,true],[0,0,true],[1,0,true]] ],
+		line: [ [[0,0,false,{left: true, right: true}],[0,1,false,{left: true, right: true}],[0,2,true,{left: true, right: true}]] , [[-1,0,true,{left: true, right: false}],[0,0,true,{left: false, right: false}],[1,0,true,{left: false, right: true}]] ],
 		plus: 'dev'
 	};
 

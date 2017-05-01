@@ -11,4 +11,4 @@ function startGameLoop(gameOb) {
 var gameLoop = startGameLoop(game)
 
 
-// gameLoop()
+gameLoop()

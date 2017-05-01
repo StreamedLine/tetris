@@ -1,0 +1,16 @@
+body {
+	text-align: center;
+}
+
+.gobtn {
+/*	display: inline-block;*/
+	width: 200px;
+	border: 1px solid lightgray;
+	border-radius: 15px;
+	margin: 20px auto;
+}
+
+#screen {
+	border: 1px solid grey;
+	display: inline-block;
+}
