@@ -4,7 +4,9 @@
 	var screen = {
 		pixels: [],
 		xLines: [],
-		yLines: []
+		yLines: [],
+		w: screen_w,
+		h: screen_h
 	};
 
 

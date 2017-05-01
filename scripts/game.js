@@ -12,7 +12,6 @@ var game = {
 
 	nextFrame: function(){
 		this.gameEngine.advance();
-		console.log('next frame');
 		this.insertFrameInDom(this.screenAsString())
 	},
 
