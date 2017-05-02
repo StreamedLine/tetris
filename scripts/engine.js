@@ -27,7 +27,26 @@
 				}
 			}
 		},
-		map: game.screen,
+		checkForFullLines: function() {
+			var lines = game.screenAsString().split('\n');
+			for (var i = lines.length-1; i >= 0; i--) {
+				if (lines[i].indexOf(' ') < 0) {
+					game.screen.xLines[i].forEach(function(s){s.chr = ' ' });
+					game.insertFrameInDom(game.screenAsString());
+				}
+			}
+			lines = game.screenAsString().split('\n');
+			for (var i = lines.length-1; i > 0; i--) {
+				for (var j = 0; j < lines[i].length; j++) {
+					if (lines[i][j] === ' ' && lines[i-1][j] === '#') {
+						lines[i-1][j] = '#';
+						lines[i][j] = ' ';
+					}
+				}
+			}
+			game.insertFrameInDom(game.screenAsString())			
+		},
+		map: game.screen, // ?
 		update_map: function() {
 			this.shapes.shapesArr.forEach(function(shape){
 				shape.calculatePostions().forEach(function(pos){
@@ -38,6 +57,7 @@
 		advance: function() {
 			this.shapes.gravity();
 			this.shapes.prune();
+			this.checkForFullLines();
 			this.update_map();
 		}
 	};
@@ -50,7 +70,7 @@
 	function Shape(name) {
 		var sd = 0, //distance from top
 			sx = 10; //should be random without going beyond edge
-		this.shapeMap = engine.shapes.shapes['line']; //DEV should be 'name' instaed of 'line'
+		this.shapeMap = engine.shapes.shapes[name]; //DEV should be 'name' instaed of 'line'
 		this.orientation = 0;
 		this.focused = true;
 		this.done = false;
@@ -102,10 +122,21 @@
 			var positions = this.calculatePostions(),
 				guide = this.shapeMap[this.orientation];
 			guide = guide.filter(function(spot){return spot[3].left === true });
-			console.log(guide)
 			if (guide.every(function(spot){return spot[0]-1+sx >= 0 && game.screen.xLines[spot[1]+sd][spot[0]-1+sx].chr === ' '})) {
 				positions.forEach(function(pos){game.screen.xLines[pos[1]][pos[0]].chr = ' ' });
 				sx -= 1;
+				game.gameEngine.update_map();
+				game.insertFrameInDom(game.screenAsString());
+			}
+
+		};
+		this.moveRight = function(val) {
+			var positions = this.calculatePostions(),
+				guide = this.shapeMap[this.orientation];
+			guide = guide.filter(function(spot){return spot[3].right === true });
+			if (guide.every(function(spot){return spot[0]-1+sx >= 0 && game.screen.xLines[spot[1]+sd][spot[0]+1+sx].chr === ' '})) {
+				positions.forEach(function(pos){game.screen.xLines[pos[1]][pos[0]].chr = ' ' });
+				sx += 1;
 				game.gameEngine.update_map();
 				game.insertFrameInDom(game.screenAsString());
 			}
@@ -117,7 +148,7 @@
 				this.moveLeft(-1);
 			} 
 			if (val == 39) {
-				//this.moveSideways(1)
+				this.moveRight(1)
 			}
 			if (val == 32) this.reorient(1)
 		};
@@ -128,8 +159,24 @@
 	engine.shapes.shapeNames = ['line', 'plus'];
 	
 	engine.shapes.shapes = {
-		line: [ [[0,0,false,{left: true, right: true}],[0,1,false,{left: true, right: true}],[0,2,true,{left: true, right: true}]] , [[-1,0,true,{left: true, right: false}],[0,0,true,{left: false, right: false}],[1,0,true,{left: false, right: true}]] ],
-		plus: 'dev'
+		line: [ 
+				[[0,0,false,{left: true, right: true}],[0,1,false,{left: true, right: true}],[0,2,true,{left: true, right: true}]] , 
+				[[-1,0,true,{left: true, right: false}],[0,0,true,{left: false, right: false}],[1,0,true,{left: false, right: true}]] 
+			],
+		plus: [  
+				[ [-1, 0, true, {left: true, right: false}] , [0, 0, false, {left: false, right: false}], [1, 0, true, {left: false, right: true}], [0, 1, true, {left: true, right: true}] ],
+				[ [0, 0, false, {left: true, right: true}] , [0, 1, false, {left: true, right: false}], [0, 2, true, {left: true, right: true}], [1, 1, true, {left: false, right: true}] ], 
+				[ [-1, 1, true, {left: true, right: false}] , [0, 1, true, {left: false, right: false}], [1, 1, true, {left: false, right: true}], [0, 0, false, {left: true, right: true}] ],
+				[ [0, 0, false, {left: true, right: true}] , [0, 1, false, {left: false, right: true}], [0, 2, true, {left: true, right: true}], [-1, 1, true, {left: true, right: false}] ],
+			],
+		upstair: [
+				[ [], [], [], [] ],
+				[ [] ,[] ,[] ,[] ]
+			],
+		downstair: [
+				[[], [], [], []],
+				[[] ,[] ,[] ,[]]
+			]
 	};
 
 	engine.shapes.create = function createShape() {
