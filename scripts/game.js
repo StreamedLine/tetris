@@ -1,5 +1,5 @@
 var game = {
-	refreshRate: 500, 
+	refreshRate: 400, 
 
 	screen: null,
 	gameEngine: null,

@@ -16,7 +16,7 @@
 				//DEV below here should be in separate function!!!DEV
 				var newShape;
 				if (this.shapesArr.length == 0) {
-					game.gameEngine.shapes.shapesArr.push(newShape = game.gameEngine.shapes.create());
+					this.shapesArr.push(newShape = this.create());
 					//check for game over
 					var taken = newShape.calculatePostions().some(function(pos){
 						return game.screen.xLines[pos[1]][pos[0]].chr != ' '
@@ -29,22 +29,29 @@
 		},
 		checkForFullLines: function() {
 			var lines = game.screenAsString().split('\n');
+			if (lines.some(function(line){return line.indexOf(' ') < 0}) == false){
+				console.log('returned')
+				return false
+			} else {
+				console.log('NOT RETURNED')
+			}
 			for (var i = lines.length-1; i >= 0; i--) {
 				if (lines[i].indexOf(' ') < 0) {
 					game.screen.xLines[i].forEach(function(s){s.chr = ' ' });
 					game.insertFrameInDom(game.screenAsString());
-				}
+				} 
 			}
 			lines = game.screenAsString().split('\n');
+			//bad code
 			for (var i = lines.length-1; i > 0; i--) {
 				for (var j = 0; j < lines[i].length; j++) {
-					if (lines[i][j] === ' ' && lines[i-1][j] === '#') {
-						lines[i-1][j] = '#';
-						lines[i][j] = ' ';
+					if (lines[i][j] === ' ' && lines[i-1][j] === '#') { 
+						lines[i-1] = lines[i-1].slice(0, j) + ' ' + lines[i-1].slice(j+1);
+						lines[i]   = lines[i].slice(0, j)   + '#' + lines[i-1].slice(j+1);
 					}
 				}
 			}
-			game.insertFrameInDom(game.screenAsString())			
+			game.insertFrameInDom(lines.join('\n'))			
 		},
 		map: game.screen, // ?
 		update_map: function() {
@@ -104,13 +111,15 @@
 			if (ortn < 0) {this.orientation = this.shapeMap.length-1}
 			if (ortn >= this.shapeMap.length) {this.orientation = 0}
 			var taken = this.calculatePostions().some(function(pos){
-				return game.screen.xLines[pos[1]][pos[0]].chr != ' '
+				return pos[0] <= 0 || pos[0] >= game.screen.xLines[0].length ||
+					   pos[1] <= 0 || pos[1] >= game.screen.xLines.length ||
+					   game.screen.xLines[pos[1]][pos[0]].chr != ' '
 			});
 			if (taken) {
 				this.orientation = original;
 				this.calculatePostions().forEach(function(pos){
-				game.screen.xLines[pos[1]][pos[0]].chr = '#'
-			});
+					game.screen.xLines[pos[1]][pos[0]].chr = '#'
+				});
 				return false;
 			} else {
 				game.gameEngine.update_map();
@@ -134,7 +143,7 @@
 			var positions = this.calculatePostions(),
 				guide = this.shapeMap[this.orientation];
 			guide = guide.filter(function(spot){return spot[3].right === true });
-			if (guide.every(function(spot){return spot[0]-1+sx >= 0 && game.screen.xLines[spot[1]+sd][spot[0]+1+sx].chr === ' '})) {
+			if (guide.every(function(spot){return spot[0]+1+sx < game.screen.xLines[0].length && game.screen.xLines[spot[1]+sd][spot[0]+1+sx].chr === ' '})) {
 				positions.forEach(function(pos){game.screen.xLines[pos[1]][pos[0]].chr = ' ' });
 				sx += 1;
 				game.gameEngine.update_map();
@@ -143,8 +152,9 @@
 
 		};
 		this.keyboardPress = function(val) {
+			if (game.gameEngine.shapes.shapesArr.length == 0)
+				return
 			if (val == 37) {
-				console.log(val)
 				this.moveLeft(-1);
 			} 
 			if (val == 39) {
@@ -152,7 +162,7 @@
 			}
 			if (val == 32) this.reorient(1)
 		};
-	}
+	}//END Shape
 
 	var engine = game.gameEngine;
 
