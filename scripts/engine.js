@@ -17,7 +17,7 @@ function createEngine(){
 				//DEV below here should be in separate function!!!DEV
 				var newShape;
 				if (this.shapesArr.length == 0) {
-					this.shapesArr.push(newShape = this.create());
+					this.shapesArr.unshift(newShape = this.create());
 					//check for game over
 					var taken = newShape.calculatePositions().some(function(pos){
 						return game.screen.xLines[pos[1]][pos[0]].chr != ' '
@@ -67,6 +67,9 @@ function createEngine(){
 			this.update_map();
 		}
 	};
+
+	var shapes = createShapes();
+	for (var attr in shapes) {engine.shapes[attr] = shapes[attr]}
 
 	return engine
 }

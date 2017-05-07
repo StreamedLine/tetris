@@ -6,7 +6,6 @@ goBtn.onclick = function() {
 	if (game) game = newGame();
 	initScreen();
 	game.gameEngine = createEngine();
-	createShapes();
 	gameLoop = startGameLoop(game)
 	screenTag.style.borderColor = 'grey'
 	gameLoop();

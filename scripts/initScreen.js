@@ -1,6 +1,6 @@
 function initScreen(){
 	var screen_w = 16,
-		screen_h = 10;
+		screen_h = 20;
 	var screen = {
 		pixels: [],
 		xLines: [],

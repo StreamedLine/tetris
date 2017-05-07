@@ -2,8 +2,8 @@ function createShapes(){
 	function Shape(name) {
 		var sd = 0, //distance from top
 			sx = 10; //distance from left side	
-		this.coloring = engine.shapes.colorMap[name];
-		this.shapeMap = engine.shapes.shapes[name]; 
+		this.coloring = shapes.colorMap[name];
+		this.shapeMap = shapes.shapes[name]; 
 		this.orientation = 0;
 		this.focused = true;
 		this.done = false;
@@ -94,44 +94,54 @@ function createShapes(){
 		};
 	}//END Shape
 
-	var engine = game.gameEngine;
 
-	engine.shapes.shapeNames = ['line', 'plus', 'cube', 'downstair'];
+	var shapes = {};
+	shapes.shapeNames = ['line', 'plus', 'cube', 'downstair', 'upstair', 'left_hook'];
 	
-	engine.shapes.shapes = {
+	shapes.shapes = {
 		line: [ 
-				[[0,0,false,{left: true, right: true}],[0,1,false,{left: true, right: true}],[0,2,true,{left: true, right: true}]] ,  //vertical
-				[[-1,0,true,{left: true, right: false}],[0,0,true,{left: false, right: false}],[1,0,true,{left: false, right: true}]] //horizontal
+				[ [0,0,false,{left: true, right: true}],[0,1,false,{left: true, right: true}],[0,2,true,{left: true, right: true}] ] ,  //vertical
+				[ [-1,0,true,{left: true, right: false}],[0,0,true,{left: false, right: false}],[1,0,true,{left: false, right: true}] ] //horizontal
 			],
 		plus: [  
 				[ [-1, 0, true, {left: true, right: false}] , [0, 0, false, {left: false, right: false}], [1, 0, true, {left: false, right: true}], [0, 1, true, {left: true, right: true}] ], //facedown
-				[ [0, 0, false, {left: true, right: true}] , [0, 1, false, {left: true, right: false}], [0, 2, true, {left: true, right: true}], [1, 1, true, {left: false, right: true}] ],   //faceright
+				[ [0, 0, false, {left: true, right: true}] , [0, 1, false, {left: false, right: true}], [0, 2, true, {left: true, right: true}], [-1, 1, true, {left: true, right: false}] ],  //faceleft
 				[ [-1, 1, true, {left: true, right: false}] , [0, 1, true, {left: false, right: false}], [1, 1, true, {left: false, right: true}], [0, 0, false, {left: true, right: true}] ], //faceup
-				[ [0, 0, false, {left: true, right: true}] , [0, 1, false, {left: false, right: true}], [0, 2, true, {left: true, right: true}], [-1, 1, true, {left: true, right: false}] ]  //faceleft
+				[ [0, 0, false, {left: true, right: true}] , [0, 1, false, {left: true, right: false}], [0, 2, true, {left: true, right: true}], [1, 1, true, {left: false, right: true}] ],   //faceright
 			],
 		downstair: [
 				[ [-1, 0, false, {left: true, right: true}], [-1, 1, true, {left: true, right: false}], [0, 1, false, {left: false, right: true}], [0, 2, true, {left: true, right: true}] ],
 				[ [-1, 2, true, {left: true, right: false}], [0, 1, false, {left: true, right: false}], [0, 2, true, {left: false, right: true}], [1, 1, true, {left: false, right: true}]]
 			],
 		upstair: [
-				[[], [], [], []],
-				[[] ,[] ,[] ,[]]
+				[ [1, 0, false, {left: true, right: true}], [1, 1, true, {left: false, right: true}], [0, 1, false, {left: true, right: false}], [0, 2, true, {left: true, right: true}] ],
+				[ [1, 2, true, {left: true, right: false}], [0, 1, false, {left: false, right: true}], [2, 2, true, {left: false, right: true}], [1, 1, false, {left: false, right: true}]]
+				// 0#   012 
+				// ##   ##2
+				// #1   0##
 			],
 		cube: [[[0,0, false, {left: true, right: false}], [1,0, false, {left: false, right: true}], [0,1, true, {left: true, right: false}], [1,1, true, {left: false, right: true}]]],
-		hook: []
+		left_hook: [
+				[ [-1, 0, true, {left: true, right: false}], [0,0,false,{left: false, right: true}],[0,1,false,{left: true, right: true}],[0,2,true,{left: true, right: true}] ],  //vertical top-left
+				[ [1, 0, false, {left: true, right: true}], [-1,1,true,{left: true, right: false}],[0,1,true,{left: false, right: false}],[1,1,true,{left: false, right: true}] ], //horizontal top-right
+				[ [1, 2, true, {left: false, right: true}], [0,0,false,{left: true, right: true}],[0,1,false,{left: true, right: true}],[0,2,true,{left: true, right: false}] ], //vertical bottom-right
+				[ [-1, 2, true, {left: true, right: true}], [-1,1,false,{left: true, right: false}],[0,1,true,{left: false, right: false}],[1,1,true,{left: false, right: true}] ], //horizontal bottom-left
+		]
 	};
 
-	engine.shapes.colorMap = {
+	shapes.colorMap = {
 		line: 'red', 
 		plus: 'darkcyan', 
 		cube: 'green', 
-		downstair: 'blue'
+		downstair: 'blue',
+		upstair: 'purple',
+		left_hook: 'saddlebrown'
 	}
 
-	engine.shapes.create = function createShape() {
-		return new Shape( engine.shapes.shapeNames.randFromArr() );
+	shapes.create = function createShape() {
+		return new Shape( shapes.shapeNames.randFromArr() );
 	};
 
-};
+	return shapes
 
-createShapes();
+};
