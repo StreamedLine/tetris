@@ -6,3 +6,10 @@ Array.prototype.randFromArr = function() {
   return a
 }
 
+function paddWithChr(chr, len) {
+	var line = '';
+	for (var i = 0; i < len; i++) {
+		line += chr;
+	}
+	return line;
+}
